@@ -1,0 +1,55 @@
+﻿@page "/Language"
+
+@using System.Globalization
+
+@inject NavigationManager navigationManager
+@inject IStringLocalizer<App> localizer
+
+<AreaTitle Name=@(localizer["LanguageTitle"]) />
+
+<div class="card card-outline card-info">
+    <div class="card-body row">
+        <div class="col-md-12">
+            <div class="text-muted">
+                <p>
+                    @(localizer["LanguageCurrent"])
+                    <b class="d-block">@CultureInfo.CurrentCulture.NativeName</b>
+                </p>
+                <p>
+                    @(localizer["LanguageSelectLocale"])
+                    <br />
+                    @foreach (var culture in supportedCultures.OrderBy(x => x.NativeName))
+                    {
+                        <div class="row">
+                            <div class="col-md-4">
+                                <NavLink href="javascript: void(0);" @onclick="() => Navigate(culture)" class="nav-link">
+                                    <span>@culture.NativeName</span>
+                                </NavLink>
+                            </div>
+                        </div>
+                    }
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code
+{
+    private CultureInfo[] supportedCultures = new[] {
+        new CultureInfo("en-US"),
+        new CultureInfo("de-DE"),
+        new CultureInfo("sv-SE"),
+    };
+
+    private void Navigate(CultureInfo info)
+    {
+        var uri = new Uri(navigationManager.Uri).GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
+        var cultureEscaped = Uri.EscapeDataString(info.Name);
+        var uriEscaped = Uri.EscapeDataString(uri);
+
+        navigationManager.NavigateTo(
+            $"Culture/Set?culture={cultureEscaped}&redirectUri={uriEscaped}",
+            forceLoad: true);
+    }
+}
